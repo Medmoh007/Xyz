@@ -1,12 +1,18 @@
 <?php
+
 namespace App\Models;
 
-use App\Lib\BaseModel;
-
-class ReferralModel extends BaseModel {
+class ReferralModel extends BaseModel
+{
     protected string $table = 'referrals';
 
-    public function byUser(int $userId) {
-        return $this->where('referrer_id', $userId);
+    public function getReferrals(int $userId): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT * FROM {$this->table}
+            WHERE referrer_id = :uid
+        ");
+        $stmt->execute(['uid' => $userId]);
+        return $stmt->fetchAll();
     }
 }

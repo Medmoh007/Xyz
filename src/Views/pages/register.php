@@ -1,54 +1,55 @@
 <?php
-$title = 'Créer un compte | HYIP Invest';
-$extra_css = '<link rel="stylesheet" href="' . config('base_url') . '/assets/css/auth.css">';
-$extra_js  = '<script src="' . config('base_url') . '/assets/js/auth.js" defer></script>';
-
+$auth_page = true;
+$title = 'Créer un compte | COMCV';
 ob_start();
 ?>
 
-<div class="auth-container">
-    <div class="auth-card">
-        <div class="auth-header">
-            <img src="<?= config('base_url') ?>/assets/img/logo.svg" alt="HYIP" class="auth-logo">
-            <h1>Créer un compte</h1>
-            <p>Rejoignez la plateforme d'investissement</p>
-        </div>
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
 
-        <form method="post" class="auth-form">
-            <input type="hidden" name="csrf" value="<?= $_SESSION['csrf'] ?>">
-
-            <div class="field">
-                <label>Nom complet</label>
-                <input type="text" name="name" required placeholder="John Doe">
+            <div class="auth-header">
+                <h1 class="auth-title">Créer un compte</h1>
+                <p class="auth-subtitle">Rejoignez la plateforme de trading COMCV</p>
             </div>
-
-            <div class="field">
-                <label>Email</label>
-                <input type="email" name="email" required placeholder="email@exemple.com">
-            </div>
-
-            <div class="field password-field">
-                <label>Mot de passe</label>
-                <input type="password" name="password" id="password" required placeholder="••••••••">
-            </div>
-
-            <div class="field password-field">
-                <label>Confirmer le mot de passe</label>
-                <input type="password" name="password_confirm" id="password_confirm" required placeholder="••••••••">
-            </div>
-
-            <button type="submit" class="btn-primary">
-                Créer mon compte
-            </button>
 
             <?php if (!empty($error)): ?>
-                <div class="error"><?= htmlspecialchars($error) ?></div>
+                <div class="auth-error"><?= $error ?></div>
             <?php endif; ?>
-        </form>
 
-        <div class="auth-footer">
-            <span>Déjà inscrit ?</span>
-            <a href="<?= config('base_url') ?>/login">Connexion</a>
+            <form method="POST" class="auth-form">
+                <input type="hidden" name="csrf" value="<?= $_SESSION['csrf'] ?>">
+
+                <div class="form-group">
+                    <label>Nom complet</label>
+                    <input type="text" name="name" placeholder="Votre nom" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" placeholder="email@exemple.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input type="password" name="password" placeholder="••••••••" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Confirmer le mot de passe</label>
+                    <input type="password" name="password_confirm" placeholder="••••••••" required>
+                </div>
+
+                <button class="btn-primary" type="submit">
+                    Créer le compte
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                Déjà un compte ?
+                <a href="<?= BASE_URL ?>/login">Se connecter</a>
+            </div>
+
         </div>
     </div>
 </div>
@@ -56,4 +57,3 @@ ob_start();
 <?php
 $content = ob_get_clean();
 require __DIR__ . '/../layouts/main.php';
-?>

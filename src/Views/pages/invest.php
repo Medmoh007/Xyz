@@ -1,10 +1,14 @@
-<h2>Nouvel investissement</h2>
+<?php
+$title = 'Investir | HYIP Invest';
+ob_start();
+?>
 
-<form method="post">
-    <input type="hidden" name="csrf" value="<?= $_SESSION['csrf'] ?>">
-    <input type="number" name="amount" placeholder="Montant" required>
-    <select name="plan">
-        <option value="basic">Basic</option>
-    </select>
-    <button>Investir</button>
-</form>
+<h1>Investir</h1>
+
+<div class="card">
+    <p>Choisissez un plan d’investissement (UI à connecter plus tard)</p>
+</div>
+
+<?php
+$content = ob_get_clean();
+require __DIR__ . '/../layouts/main.php';

@@ -1,16 +1,21 @@
 <?php
+
 namespace App\Controllers;
 
-use App\Lib\BaseController;
-use App\Models\UserModel;
-use App\Models\InvestmentModel;
+class AdminController
+{
+    public function index(): void
+    {
+        view('admin/index');
+    }
 
-class AdminController extends BaseController {
+    public function users(): void
+    {
+        view('admin/users');
+    }
 
-    public function index() {
-        $this->view('admin/index', [
-            'users' => (new UserModel())->all(),
-            'total_invest' => (new InvestmentModel())->total()
-        ]);
+    public function settings(): void
+    {
+        view('admin/settings');
     }
 }

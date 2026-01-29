@@ -1,7 +1,14 @@
-<h2>Demande de retrait</h2>
+<?php
+$title = 'Retraits | HYIP Invest';
+ob_start();
+?>
 
-<form method="post">
-    <input type="hidden" name="csrf" value="<?= $_SESSION['csrf'] ?>">
-    <input type="number" name="amount" placeholder="Montant" required>
-    <button>Envoyer</button>
-</form>
+<h1>Retraits</h1>
+
+<div class="card">
+    <p>Historique et demande de retrait</p>
+</div>
+
+<?php
+$content = ob_get_clean();
+require __DIR__ . '/../layouts/main.php';

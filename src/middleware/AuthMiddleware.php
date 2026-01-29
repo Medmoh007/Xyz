@@ -1,15 +1,13 @@
 <?php
+
 namespace App\Middleware;
 
-use function flash;
-use function config;
-
-class AuthMiddleware {
-
-    public function handle(): void {
-        if (empty($_SESSION['user'])) {
-            flash('error', 'Connexion requise');
-            header('Location: ' . config('base_url') . '/login');
+class AuthMiddleware
+{
+    public static function handle()
+    {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . BASE_URL . '/login');
             exit;
         }
     }

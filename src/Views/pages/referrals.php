@@ -1,10 +1,15 @@
-<h2>Parrainage</h2>
+<?php
+$title = 'Parrainage | HYIP Invest';
+ob_start();
+?>
 
-<p>Lien de parrainage :</p>
-<code><?= $link ?></code>
+<h1>Parrainage</h1>
 
-<ul>
-<?php foreach ($referrals as $ref): ?>
-    <li>Utilisateur ID : <?= $ref['user_id'] ?></li>
-<?php endforeach; ?>
-</ul>
+<div class="card">
+    <p>Votre lien de parrainage :</p>
+    <strong><?= BASE_URL ?>/register?ref=XXXX</strong>
+</div>
+
+<?php
+$content = ob_get_clean();
+require __DIR__ . '/../layouts/main.php';

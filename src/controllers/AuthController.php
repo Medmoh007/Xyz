@@ -1,139 +1,196 @@
 <?php
+/*
 namespace App\Controllers;
 
-use App\Models\UserModel;
+use App\Models\User;
+use App\Utils\Security;
 
 class AuthController
 {
-    /**
-     * LOGIN
-     */
     public function login()
     {
-        // GET → afficher le formulaire
-        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            $_SESSION['csrf'] = bin2hex(random_bytes(32));
-            view('pages/login');
-            return;
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $email = trim($_POST['email']);
+            $password = $_POST['password'];
+
+            $user = User::findByEmail($email);
+
+            if (!$user || !password_verify($password, $user['password'])) {
+                return view('login', ['error' => "Email ou mot de passe incorrect"]);
+            }
+
+            $_SESSION['user'] = [
+                'id' => $user['id'],
+                'name' => $user['name'],
+                'email' => $user['email'],
+            ];
+
+            redirect('/dashboard');
         }
 
-        // POST → traiter la connexion
-        $errors = [];
-
-        // CSRF
-        if (
-            empty($_POST['csrf']) ||
-            $_POST['csrf'] !== ($_SESSION['csrf'] ?? '')
-        ) {
-            $errors[] = "Session expirée";
-        }
-
-        $email    = trim($_POST['email'] ?? '');
-        $password = $_POST['password'] ?? '';
-
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = "Email invalide";
-        }
-
-        if ($password === '') {
-            $errors[] = "Mot de passe requis";
-        }
-
-        if (!empty($errors)) {
-            view('pages/login', [
-                'error' => implode('<br>', $errors)
-            ]);
-            return;
-        }
-
-        $userModel = new UserModel();
-        $user = $userModel->findByEmail($email);
-
-        if (!$user || !password_verify($password, $user['password'])) {
-            view('pages/login', [
-                'error' => 'Identifiants incorrects'
-            ]);
-            return;
-        }
-
-        // Connexion OK
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['user'] = $user;
-
-        redirect('/dashboard');
+        view('login');
     }
 
-    /**
-     * REGISTER (celui que tu avais)
-     */
     public function register()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            $_SESSION['csrf'] = bin2hex(random_bytes(32));
-            view('pages/register');
-            return;
-        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name    = trim($_POST['name']);
+            $email   = trim($_POST['email']);
+            $pass    = $_POST['password'];
+            $confirm = $_POST['password_confirm'];
 
-        $errors = [];
+            if ($pass !== $confirm) {
+                return view('register', ['error' => "Les mots de passe ne correspondent pas"]);
+            }
 
-        if (
-            empty($_POST['csrf']) ||
-            $_POST['csrf'] !== ($_SESSION['csrf'] ?? '')
-        ) {
-            $errors[] = "Session expirée";
-        }
+            if (User::findByEmail($email)) {
+                return view('register', ['error' => "Email déjà utilisé"]);
+            }
 
-        $name     = trim($_POST['name'] ?? '');
-        $email    = trim($_POST['email'] ?? '');
-        $password = $_POST['password'] ?? '';
-        $confirm  = $_POST['password_confirm'] ?? '';
-
-        if ($name === '' || strlen($name) < 3) {
-            $errors[] = "Nom invalide";
-        }
-
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = "Email invalide";
-        }
-
-        if (strlen($password) < 8) {
-            $errors[] = "Mot de passe trop court (8 caractères min)";
-        }
-
-        if ($password !== $confirm) {
-            $errors[] = "Les mots de passe ne correspondent pas";
-        }
-
-        $userModel = new UserModel();
-
-        if ($userModel->findByEmail($email)) {
-            $errors[] = "Email déjà utilisé";
-        }
-
-        if (!empty($errors)) {
-            view('pages/register', [
-                'error' => implode('<br>', $errors)
+            User::create([
+                'name'     => $name,
+                'email'    => $email,
+                'password' => password_hash($pass, PASSWORD_BCRYPT),
             ]);
-            return;
+
+            redirect('/login');
         }
 
-        $userModel->create([
-            'name'     => htmlspecialchars($name),
-            'email'    => strtolower($email),
-            'password' => password_hash($password, PASSWORD_BCRYPT)
-        ]);
-
-        $_SESSION['user_id'] = $userModel->findByEmail($email)['id'];
-
-        redirect('/dashboard');
+        view('register');
     }
 
-    /**
-     * LOGOUT
-     */
     public function logout()
     {
         session_destroy();
         redirect('/login');
     }
+}*/
+namespace App\Controllers;
+
+use App\Models\User;
+
+class AuthController
+{
+    public function __construct()
+    {
+        // Démarre la session si elle n'existe pas
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+    }
+
+    /**
+     * Page de connexion
+     */
+    public function login()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $email = trim($_POST['email'] ?? '');
+            $password = $_POST['password'] ?? '';
+
+            $errors = [];
+
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = "Email invalide";
+            }
+
+            if (empty($password)) {
+                $errors[] = "Le mot de passe est requis";
+            }
+
+            $user = User::findByEmail($email);
+
+            if (!$user || !password_verify($password, $user['password'])) {
+                $errors[] = "Email ou mot de passe incorrect";
+            }
+
+            if (!empty($errors)) {
+                return view('login', ['error' => implode('<br>', $errors)]);
+            }
+
+            // Connexion réussie
+            $_SESSION['user'] = [
+                'id'    => $user['id'],
+                'name'  => $user['name'],
+                'email' => $user['email'],
+            ];
+
+            redirect('/dashboard');
+        }
+
+        // Afficher le formulaire si GET
+        view('login');
+    }
+
+    /**
+     * Page d'inscription
+     */
+    public function register()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name             = trim($_POST['name'] ?? '');
+            $email            = trim($_POST['email'] ?? '');
+            $password         = $_POST['password'] ?? '';
+            $password_confirm = $_POST['password_confirm'] ?? '';
+
+            $errors = [];
+
+            if (empty($name)) {
+                $errors[] = "Le nom est requis";
+            }
+
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = "Email invalide";
+            }
+
+            if (strlen($password) < 6) {
+                $errors[] = "Le mot de passe doit faire au moins 6 caractères";
+            }
+
+            if ($password !== $password_confirm) {
+                $errors[] = "Les mots de passe ne correspondent pas";
+            }
+
+            if (User::findByEmail($email)) {
+                $errors[] = "Email déjà utilisé";
+            }
+
+            if (!empty($errors)) {
+                return view('register', ['error' => implode('<br>', $errors)]);
+            }
+
+            // Création de l'utilisateur
+            $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+
+            User::create([
+                'name'     => $name,
+                'email'    => $email,
+                'password' => $hashed_password,
+            ]);
+
+            // Connexion automatique après inscription
+            $newUser = User::findByEmail($email);
+            $_SESSION['user'] = [
+                'id'    => $newUser['id'],
+                'name'  => $newUser['name'],
+                'email' => $newUser['email'],
+            ];
+
+            redirect('/dashboard');
+        }
+
+        // Afficher le formulaire si GET
+        view('register');
+    }
+
+    /**
+     * Déconnexion
+     */
+    public function logout()
+    {
+        $_SESSION = [];
+        session_destroy();
+        redirect('/login');
+    }
 }
+

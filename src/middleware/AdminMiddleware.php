@@ -1,15 +1,14 @@
 <?php
+
 namespace App\Middleware;
 
-use function flash;
-use function config;
-
-class AdminMiddleware {
-
-    public function handle(): void {
-        if (($_SESSION['user']['role'] ?? '') !== 'admin') {
-            flash('error', 'Accès refusé');
-            header('Location: ' . config('base_url') . '/dashboard');
+class AdminMiddleware
+{
+    public function handle(): void
+    {
+        if (empty($_SESSION['user_id']) || ($_SESSION['is_admin'] ?? false) !== true) {
+            http_response_code(403);
+            echo "Accès interdit";
             exit;
         }
     }

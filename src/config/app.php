@@ -2,5 +2,5 @@
 
 return [
     'site_name' => 'HYIP Futuriste Educatif',
-    'base_url'  => '/x/public',
+    'site_url' => 'http://localhost/x/public',
 ];

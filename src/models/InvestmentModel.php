@@ -1,16 +1,19 @@
 <?php
+
 namespace App\Models;
 
-use App\Lib\BaseModel;
-
-class InvestmentModel extends BaseModel {
+class InvestmentModel extends BaseModel
+{
     protected string $table = 'investments';
 
-    public function byUser(int $userId) {
-        return $this->where('user_id', $userId);
-    }
-
-    public function total() {
-        return $this->db->query("SELECT SUM(amount) FROM investments")->fetchColumn();
+    public function getByUser(int $userId): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT * FROM {$this->table}
+            WHERE user_id = :uid
+            ORDER BY created_at DESC
+        ");
+        $stmt->execute(['uid' => $userId]);
+        return $stmt->fetchAll();
     }
 }

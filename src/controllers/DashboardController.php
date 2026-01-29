@@ -1,18 +1,53 @@
 <?php
+/*
 namespace App\Controllers;
 
-use App\Lib\BaseController;
-use App\Models\InvestmentModel;
-use App\Models\TransactionModel;
+class DashboardController
+{
+    public function index()
+    {
+        $dashboard_page = true;
+        $title = 'Dashboard | COMCV';
 
-class DashboardController extends BaseController {
+        require view('pages/dashboard');
+    }
+}*/
 
-    public function index() {
-        $userId = $_SESSION['user']['id'];
+namespace App\Controllers;
 
-        $this->view('pages/dashboard', [
-            'balance' => (new TransactionModel())->balance($userId),
-            'investments' => (new InvestmentModel())->byUser($userId)
+class DashboardController
+{
+    public function __construct()
+    {
+        // Démarre la session si elle n'existe pas
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // Vérifier si l'utilisateur est connecté
+        if (!isset($_SESSION['user'])) {
+            redirect('/login'); // Utilise le helper de redirection
+            exit;
+        }
+    }
+
+    /**
+     * Page dashboard
+     */
+    public function index()
+    {
+        $dashboard_page = true;
+        $title = 'Dashboard | COMCV';
+
+        // Récupération des infos utilisateur pour affichage
+        $user = $_SESSION['user'];
+
+        // Affiche la vue dashboard
+        view('pages/dashboard', [
+            'title' => $title,
+            'user'  => $user,
+            'dashboard_page' => $dashboard_page
         ]);
     }
 }
+
