@@ -3,27 +3,31 @@
 
 define('APP_NAME', 'QuantumInvest');
 define('APP_VERSION', '1.0.0');
-define('BASE_URL', 'http://localhost:8000');
+define('BASE_URL', rtrim('http://localhost/x/public', '/'));
+define('DEPOSIT_ADDRESS', 'TYourCommonAddressHere12345678901234567890');
 
 // Investment plans
 define('PLANS', [
     'starter' => [
-        'min' => 50,
-        'max' => 499,
-        'daily' => 1.5,
-        'duration' => 30
+        'min'       => 50,
+        'max'       => 499,
+        'daily'     => 1.5,
+        'duration'  => 30,
+        'name'      => 'Starter Plan'
     ],
     'professional' => [
-        'min' => 500,
-        'max' => 4999,
-        'daily' => 2.2,
-        'duration' => 30
+        'min'       => 500,
+        'max'       => 4999,
+        'daily'     => 2.2,
+        'duration'  => 30,
+        'name'      => 'Professional Plan'
     ],
     'premium' => [
-        'min' => 5000,
-        'max' => 50000,
-        'daily' => 3.5,
-        'duration' => 30
+        'min'       => 5000,
+        'max'       => 50000,
+        'daily'     => 3.5,
+        'duration'  => 30,
+        'name'      => 'Premium Plan'
     ]
 ]);
 

@@ -1,54 +1,27 @@
 <?php
-declare(strict_types=1);
+// public/index.php
 
+// Activer l'affichage des erreurs (dev)
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// Démarrer la session OBLIGATOIREMENT avant tout
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Charger l'autoloader Composer
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// Charger les variables d'environnement
 use Dotenv\Dotenv;
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
 
-session_start();
+// Charger la configuration (définit BASE_URL)
+require_once __DIR__ . '/../src/config/config.php';
 
-require __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/../src/utils/helpers.php';
-
-$dotenv = Dotenv::createImmutable(__DIR__ . '/..');
-$dotenv->safeLoad();
-
-define('BASE_URL', $_ENV['BASE_URL'] ?? '/x/public');
-
-/**
- * URI CLEAN
- */
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
-// forcer suppression /x/public
-$uri = preg_replace('#^/x/public#', '', $uri);
-
-// retirer index.php
-$uri = str_replace('/index.php', '', $uri);
-
-$uri = rtrim($uri, '/') ?: '/';
-
-
-/**
- * ROUTES
- */
-$routes = require __DIR__ . '/../src/routes.php';
-
-if (!isset($routes[$uri])) {
-    http_response_code(404);
-    echo "404 - Route PHP non trouvée ($uri)";
-    exit;
-}
-
-$route = $routes[$uri];
-
-/**
- * Middleware
- */
-foreach ($route['middleware'] ?? [] as $middleware) {
-    (new $middleware())->handle();
-}
-
-/**
- * Controller
- */
-[$controller, $method] = $route['action'];
-(new $controller())->$method();
+// Instancier et exécuter le routeur
+$router = require __DIR__ . '/../src/Router.php';
+$router->dispatch();

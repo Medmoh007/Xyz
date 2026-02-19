@@ -1,37 +1,82 @@
 <?php
-// src/lib/BaseController.php
+namespace App\Lib;
 
-class BaseController {
+use App\Lib\Database;
+
+class BaseController
+{
     protected $db;
-    protected $viewPath = 'src/views/';
+    protected string $viewPath;
 
-    public function __construct() {
+    public function __construct()
+    {
+        // Connexion DB (si nécessaire)
         $this->db = Database::getInstance();
+        $this->viewPath = __DIR__ . '/../views/';
     }
 
-    protected function render($view, $data = []) {
+    /**
+     * Affiche une vue
+     */
+    protected function view(string $view, array $data = []): void
+    {
         extract($data);
-        require $this->viewPath . $view . '.php';
+        $file = $this->viewPath . $view . '.php';
+
+        if (file_exists($file)) {
+            require $file;
+        } else {
+            die("Vue non trouvée: $file");
+        }
     }
 
-    protected function json($data, $status = 200) {
+    /**
+     * Retourne une réponse JSON
+     */
+    protected function json(array $data, int $status = 200): void
+    {
         http_response_code($status);
         header('Content-Type: application/json');
         echo json_encode($data);
         exit;
     }
 
-    protected function redirect($url) {
-        header('Location: ' . BASE_URL . $url);
+    /**
+     * Redirige vers une URL
+     */
+    protected function redirect(string $url): void
+    {
+        $baseUrl = defined('BASE_URL') ? BASE_URL : '';
+        header('Location: ' . $baseUrl . $url);
         exit;
     }
 
-    protected function checkCSRF() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-                die('CSRF token validation failed');
-            }
+    /**
+     * Vérifie le token CSRF
+     */
+    protected function verifyCsrfToken(string $token): bool
+    {
+        return isset($_SESSION['csrf_token']) && $_SESSION['csrf_token'] === $token;
+    }
+
+    /**
+     * Vérifie l'authentification
+     */
+    protected function checkAuth(): void
+    {
+        if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
+            $this->redirect('/login');
         }
     }
+
+    /**
+     * Génère un token CSRF
+     */
+    protected function generateCsrfToken(): string
+    {
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['csrf_token'];
+    }
 }
-?>

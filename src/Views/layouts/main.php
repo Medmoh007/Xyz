@@ -1,147 +1,47 @@
-<?php /*
-// Variables de contrôle de layout
-$auth_page = $auth_page ?? false;
-$dashboard_page = $dashboard_page ?? false;
-?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $title ?? 'COMCV Trading' ?></title>
+    <title><?= htmlspecialchars($title ?? 'COMCV Trading') ?></title>
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap & Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <!-- CSS Global (toujours chargé) -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/main.css">
+    <!-- CSS – CHEMINS ABSOLUS TEMPORAIRES -->
+    <link rel="stylesheet" href="/x/public/assets/css/main.css">
+    <link rel="stylesheet" href="/x/public/assets/css/auth.css">
+    <link rel="stylesheet" href="/x/public/assets/css/dashboard.css">
+    <link rel="stylesheet" href="/x/public/assets/css/investments.css">
+    <link rel="stylesheet" href="/x/public/assets/css/wallet.css">
+    <link rel="stylesheet" href="/x/public/assets/css/trade.css">
+    <link rel="stylesheet" href="/x/public/assets/css/support.css">
 
-    <!-- CSS Auth (uniquement sur login/register) -->
-    <?php if ($auth_page): ?>
-        <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/auth.css">
-    <?php endif; ?>
-
-    <!-- CSS Dashboard (uniquement sur dashboard) -->
-    <?php if ($dashboard_page): ?>
-        <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/dashboard.css">
-    <?php endif; ?>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- TradingView -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 </head>
-<body class="<?= $dashboard_page ? 'dashboard-body' : '' ?>">
+<body>
+    <?php include __DIR__ . '/../partials/header.php'; ?>
+    <?php include __DIR__ . '/../partials/nav.php'; ?>
+    <?php include __DIR__ . '/../partials/flash.php'; ?>
 
-<?php if ($dashboard_page): ?>
-<!-- =====================
-     LAYOUT DASHBOARD
-===================== -->
-<div class="dashboard-layout">
-    
-    <!-- Sidebar fixe (si tu en veux une globale) -->
-    <?php if (file_exists(__DIR__ . '/../partials/sidebar.php')): ?>
-        <?php require __DIR__ . '/../partials/sidebar.php'; ?>
-    <?php endif; ?>
+    <main>
+        <?= $content ?? '' ?>
+    </main>
 
-    <!-- Main Content -->
-    <div class="main-content-wrapper">
-        <!-- Navbar globale (optionnelle) -->
-        <?php if (file_exists(__DIR__ . '/../partials/nav.php')): ?>
-            <?php require __DIR__ . '/../partials/nav.php'; ?>
-        <?php endif; ?>
+    <?php include __DIR__ . '/../partials/footer.php'; ?>
 
-        <!-- Contenu de la page -->
-        <main class="main-content">
-            <?= $content ?>
-        </main>
-    </div>
-
-</div>
-
-<?php else: ?>
-<!-- =====================
-     LAYOUT PUBLIC/AUTH
-===================== -->
-<?= $content ?>
-<?php endif; ?>
-
-<!-- JS Global -->
-<script src="<?= BASE_URL ?>/assets/js/interactions.js"></script>
-
-<!-- JS Dashboard -->
-<?php if ($dashboard_page): ?>
-    <script src="<?= BASE_URL ?>/assets/js/dashboard.js"></script>
-<?php endif; ?>
-
-<!-- JS Auth -->
-<?php if ($auth_page): ?>
-    <script src="<?= BASE_URL ?>/assets/js/auth.js"></script>
-<?php endif; ?>
-
-</body>
-</html>*/
-
-
-// Variables de contrôle de layout
-$auth_page = $auth_page ?? false;
-$dashboard_page = $dashboard_page ?? false;
-?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $title ?? 'COMCV Trading' ?></title>
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- CSS Global -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/main.css">
-
-    <!-- CSS Auth -->
-    <?php if ($auth_page): ?>
-        <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/auth.css">
-    <?php endif; ?>
-
-    <!-- CSS Dashboard -->
-    <?php if ($dashboard_page): ?>
-        <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/dashboard.css">
-    <?php endif; ?>
-</head>
-<body class="<?= $dashboard_page ? 'dashboard-body' : '' ?>">
-
-<?php if ($dashboard_page): ?>
-<div class="dashboard-layout">
-    <!-- Sidebar -->
-    <?php if (file_exists(__DIR__ . '/../partials/sidebar.php')): ?>
-        <?php require __DIR__ . '/../partials/sidebar.php'; ?>
-    <?php endif; ?>
-
-    <div class="main-content-wrapper">
-        <!-- Navbar -->
-        <?php if (file_exists(__DIR__ . '/../partials/nav.php')): ?>
-            <?php require __DIR__ . '/../partials/nav.php'; ?>
-        <?php endif; ?>
-
-        <!-- Contenu -->
-        <main class="main-content">
-            <?= $content ?>
-        </main>
-    </div>
-</div>
-
-<?php else: ?>
-    <!-- Layout Auth / Public -->
-    <?= $content ?>
-<?php endif; ?>
-
-<!-- JS Global -->
-<script src="<?= BASE_URL ?>/assets/js/interactions.js"></script>
-
-<?php if ($dashboard_page): ?>
-    <script src="<?= BASE_URL ?>/assets/js/dashboard.js"></script>
-<?php endif; ?>
-
-<?php if ($auth_page): ?>
-    <script src="<?= BASE_URL ?>/assets/js/auth.js"></script>
-<?php endif; ?>
-
+    <!-- JS – CHEMINS ABSOLUS TEMPORAIRES -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/x/public/assets/js/main.js"></script>
+    <script src="/x/public/assets/js/auth.js"></script>
+    <script src="/x/public/assets/js/dashboard.js"></script>
+    <script src="/x/public/assets/js/investments.js"></script>
+    <script src="/x/public/assets/js/wallet.js"></script>
+    <script src="/x/public/assets/js/trade.js"></script>
+    <script src="/x/public/assets/js/support.js"></script>
 </body>
 </html>

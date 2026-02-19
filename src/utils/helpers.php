@@ -65,3 +65,8 @@ function abort404(string $message = '404 - Page non trouvée'): void
     http_response_code(404);
     die($message);
 }
+
+function generateCryptoAddress(): string
+{
+    return 'T' . substr(bin2hex(random_bytes(20)), 0, 33);
+}

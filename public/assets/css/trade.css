@@ -1,0 +1,144 @@
+/* ============================================
+   TRADE PAGE
+   ============================================ */
+
+.trade-container {
+  max-width: 1400px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+/* Balance Card */
+.balance-card {
+  background: linear-gradient(135deg, var(--card-bg), #1a1c2b);
+  border: 1px solid var(--primary-color);
+}
+
+.balance-card .row {
+  margin: 0;
+}
+
+.balance-card .border-end {
+  border-right: 1px solid var(--border-color) !important;
+}
+
+/* Formulaires */
+.form-control {
+  background: var(--background-dark);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(240, 185, 11, 0.2);
+}
+
+.btn-buy,
+.btn-sell {
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-buy {
+  background: var(--profit-color);
+}
+
+.btn-buy:hover {
+  background: #0ebc75;
+  transform: translateY(-2px);
+}
+
+.btn-sell {
+  background: var(--loss-color);
+}
+
+.btn-sell:hover {
+  background: #e04b5c;
+  transform: translateY(-2px);
+}
+
+/* Type badges */
+.type-buy {
+  color: var(--profit-color);
+  font-weight: 600;
+}
+.type-sell {
+  color: var(--loss-color);
+  font-weight: 600;
+}
+
+/* Positions */
+.position-profit {
+  color: var(--profit-color);
+}
+.position-loss {
+  color: var(--loss-color);
+}
+
+.badge-profit {
+  background: rgba(14, 203, 129, 0.2);
+  color: var(--profit-color);
+}
+
+.badge-loss {
+  background: rgba(246, 70, 93, 0.2);
+  color: var(--loss-color);
+}
+
+/* TradingView Chart */
+#tradingview_chart {
+  height: 500px;
+  width: 100%;
+  background: var(--background-dark);
+  border-radius: 8px;
+}
+
+/* Table */
+.table-dark {
+  background-color: var(--background-dark);
+  color: var(--text-primary);
+}
+
+.table-dark thead th {
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.table-dark tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.table-dark tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Alerts */
+.alert-success {
+  background: rgba(14, 203, 129, 0.1);
+  border: 1px solid var(--profit-color);
+  color: var(--profit-color);
+}
+
+.alert-danger {
+  background: rgba(246, 70, 93, 0.1);
+  border: 1px solid var(--loss-color);
+  color: var(--loss-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .balance-card .border-end {
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+  }
+}

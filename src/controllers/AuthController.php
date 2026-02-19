@@ -1,196 +1,169 @@
 <?php
-/*
 namespace App\Controllers;
 
-use App\Models\User;
-use App\Utils\Security;
+use App\Lib\BaseController;
+use App\Models\UserModel;
+use App\Models\WalletModel;
 
-class AuthController
+class AuthController extends BaseController
 {
-    public function login()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $email = trim($_POST['email']);
-            $password = $_POST['password'];
+    private UserModel $userModel;
+    private WalletModel $walletModel;
 
-            $user = User::findByEmail($email);
-
-            if (!$user || !password_verify($password, $user['password'])) {
-                return view('login', ['error' => "Email ou mot de passe incorrect"]);
-            }
-
-            $_SESSION['user'] = [
-                'id' => $user['id'],
-                'name' => $user['name'],
-                'email' => $user['email'],
-            ];
-
-            redirect('/dashboard');
-        }
-
-        view('login');
-    }
-
-    public function register()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $name    = trim($_POST['name']);
-            $email   = trim($_POST['email']);
-            $pass    = $_POST['password'];
-            $confirm = $_POST['password_confirm'];
-
-            if ($pass !== $confirm) {
-                return view('register', ['error' => "Les mots de passe ne correspondent pas"]);
-            }
-
-            if (User::findByEmail($email)) {
-                return view('register', ['error' => "Email déjà utilisé"]);
-            }
-
-            User::create([
-                'name'     => $name,
-                'email'    => $email,
-                'password' => password_hash($pass, PASSWORD_BCRYPT),
-            ]);
-
-            redirect('/login');
-        }
-
-        view('register');
-    }
-
-    public function logout()
-    {
-        session_destroy();
-        redirect('/login');
-    }
-}*/
-namespace App\Controllers;
-
-use App\Models\User;
-
-class AuthController
-{
     public function __construct()
     {
-        // Démarre la session si elle n'existe pas
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+        parent::__construct();
+        $this->userModel = new UserModel();
+        $this->walletModel = new WalletModel();
+        $this->ensureCsrfToken();
+    }
+
+    private function ensureCsrfToken(): void
+    {
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         }
     }
 
-    /**
-     * Page de connexion
-     */
+    private function validateCsrfToken(?string $token): bool
+    {
+        return !empty($token)
+            && isset($_SESSION['csrf_token'])
+            && hash_equals($_SESSION['csrf_token'], $token);
+    }
+
     public function login()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $email = trim($_POST['email'] ?? '');
-            $password = $_POST['password'] ?? '';
+        if (isset($_SESSION['user_id'])) {
+            $this->redirect('/dashboard');
+        }
 
-            $errors = [];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!$this->validateCsrfToken($_POST['csrf_token'] ?? null)) {
+                return $this->view('pages/login', [
+                    'error' => "Session invalide, veuillez réessayer."
+                ]);
+            }
+
+            $email    = trim($_POST['email'] ?? '');
+            $password = $_POST['password'] ?? '';
+            $errors   = [];
 
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errors[] = "Email invalide";
+                $errors[] = "Email invalide.";
             }
-
             if (empty($password)) {
-                $errors[] = "Le mot de passe est requis";
+                $errors[] = "Mot de passe requis.";
             }
 
-            $user = User::findByEmail($email);
-
+            $user = $this->userModel->findByEmail($email);
             if (!$user || !password_verify($password, $user['password'])) {
-                $errors[] = "Email ou mot de passe incorrect";
+                $errors[] = "Email ou mot de passe incorrect.";
             }
 
             if (!empty($errors)) {
-                return view('login', ['error' => implode('<br>', $errors)]);
+                return $this->view('pages/login', [
+                    'error' => implode('<br>', $errors),
+                    'email' => $email
+                ]);
             }
 
-            // Connexion réussie
+            session_regenerate_id(true);
+
+            $_SESSION['user_id'] = $user['id'];
             $_SESSION['user'] = [
-                'id'    => $user['id'],
-                'name'  => $user['name'],
-                'email' => $user['email'],
+                'id'      => $user['id'],
+                'name'    => $user['name'] ?? $user['username'],
+                'email'   => $user['email'],
+                'balance' => $this->walletModel->getAvailableBalance($user['id']),
+                'role'    => $user['role'] ?? 'user'
             ];
 
-            redirect('/dashboard');
+            $this->redirect('/dashboard');
         }
 
-        // Afficher le formulaire si GET
-        view('login');
+        $this->view('pages/login');
     }
 
-    /**
-     * Page d'inscription
-     */
     public function register()
     {
+        if (isset($_SESSION['user_id'])) {
+            $this->redirect('/dashboard');
+        }
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $name             = trim($_POST['name'] ?? '');
-            $email            = trim($_POST['email'] ?? '');
-            $password         = $_POST['password'] ?? '';
-            $password_confirm = $_POST['password_confirm'] ?? '';
+            if (!$this->validateCsrfToken($_POST['csrf_token'] ?? null)) {
+                return $this->view('pages/register', [
+                    'error' => "Session invalide, veuillez réessayer."
+                ]);
+            }
+
+            $name            = trim($_POST['name'] ?? '');
+            $email           = trim($_POST['email'] ?? '');
+            $password        = $_POST['password'] ?? '';
+            $passwordConfirm = $_POST['password_confirm'] ?? '';
+            $terms           = isset($_POST['terms']);
 
             $errors = [];
 
-            if (empty($name)) {
-                $errors[] = "Le nom est requis";
-            }
-
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errors[] = "Email invalide";
-            }
-
-            if (strlen($password) < 6) {
-                $errors[] = "Le mot de passe doit faire au moins 6 caractères";
-            }
-
-            if ($password !== $password_confirm) {
-                $errors[] = "Les mots de passe ne correspondent pas";
-            }
-
-            if (User::findByEmail($email)) {
-                $errors[] = "Email déjà utilisé";
-            }
+            if (empty($name)) $errors[] = "Nom complet requis.";
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Email invalide.";
+            if (strlen($password) < 6) $errors[] = "Mot de passe (min 6 caractères).";
+            if ($password !== $passwordConfirm) $errors[] = "Les mots de passe ne correspondent pas.";
+            if (!$terms) $errors[] = "Vous devez accepter les conditions.";
+            if ($this->userModel->findByEmail($email)) $errors[] = "Cet email est déjà utilisé.";
 
             if (!empty($errors)) {
-                return view('register', ['error' => implode('<br>', $errors)]);
+                return $this->view('pages/register', [
+                    'error' => implode('<br>', $errors),
+                    'name'  => $name,
+                    'email' => $email
+                ]);
             }
 
-            // Création de l'utilisateur
-            $hashed_password = password_hash($password, PASSWORD_BCRYPT);
-
-            User::create([
+            // Création utilisateur
+            $userId = $this->userModel->create([
                 'name'     => $name,
                 'email'    => $email,
-                'password' => $hashed_password,
+                'password' => $password
             ]);
 
-            // Connexion automatique après inscription
-            $newUser = User::findByEmail($email);
+            if (!$userId) {
+                return $this->view('pages/register', [
+                    'error' => "Erreur lors de la création du compte."
+                ]);
+            }
+
+            // Création wallet (retour booléen)
+            if (!$this->walletModel->create($userId)) {
+                // Rollback : supprimer l'utilisateur créé
+                $this->userModel->delete($userId);
+                return $this->view('pages/register', [
+                    'error' => "Erreur lors de la création du portefeuille."
+                ]);
+            }
+
+            session_regenerate_id(true);
+
+            $_SESSION['user_id'] = $userId;
             $_SESSION['user'] = [
-                'id'    => $newUser['id'],
-                'name'  => $newUser['name'],
-                'email' => $newUser['email'],
+                'id'      => $userId,
+                'name'    => $name,
+                'email'   => $email,
+                'balance' => $this->walletModel->getAvailableBalance($userId),
+                'role'    => 'user'
             ];
 
-            redirect('/dashboard');
+            $this->redirect('/dashboard');
         }
 
-        // Afficher le formulaire si GET
-        view('register');
+        $this->view('pages/register');
     }
 
-    /**
-     * Déconnexion
-     */
     public function logout()
     {
         $_SESSION = [];
         session_destroy();
-        redirect('/login');
+        $this->redirect('/login');
     }
 }
-

@@ -2,15 +2,28 @@
 
 namespace App\Controllers;
 
-class HomeController
+use App\Lib\BaseController;
+
+class HomeController extends BaseController
 {
-    public function index(): void
+    public function index()
     {
-        view('pages/home');
+        $data = [
+            'title' => 'Accueil | COMCV Trading',
+            'message' => 'Bienvenue sur la plateforme'
+        ];
+
+        // ✅ Utiliser la méthode héritée
+        $this->view('pages/home', $data);
     }
 
-    public function about(): void
+    public function about()
     {
-        view('pages/about');
+        $data = [
+            'title' => 'À propos | COMCV Trading',
+            'content' => 'Présentation de la société...'
+        ];
+
+        $this->view('pages/about', $data);
     }
 }
